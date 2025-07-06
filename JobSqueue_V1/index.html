@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html ng-app="hpccApp">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <title>High performance Computing  Explorer</title>
+
+    <script defer src="src/font-awsome/js/all.js"></script> <!--load all styles -->
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="src/style/materialize.min.css">
+    <link href="src/materialize-icon/google-icon.css"
+          rel="stylesheet">
+<!--    <link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet">-->
+
+
+    <link rel="stylesheet" type="text/css" href="parallel.css" />
+    <link href="src/style/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+    <link href="src/style/main.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="src/style/theme.css" />
+    <link rel="stylesheet" type="text/css" href="src/style/main.css" />
+    <link rel="stylesheet" type="text/css" href="theme.css" />
+    <script src="src/lib/jquery-3.3.1.js"></script>
+    <script src="src/lib/materialize.min.js"></script>
+
+    <script src="src/lib/underscore-min.js"></script>
+    <script src='src/lib/spin.min.js'></script> <!-- Spinner when loading -->
+    <script src="src/lib/angular.min.js"></script>
+    <script src="src/lib/angular-route.js"></script>
+    <script src="src/script/angular/hpcc.js"></script>
+
+</head>
+<body text="black" id="mainBody" ng-controller="MainCtrl" class="light">
+<div class="cover">
+    <h5 class="spinnerC center" style="top: 60%;" >loading data...</h5>
+    <div class="spinnerC center" id="loadingSpinner" >
+    </div>
+</div>
+<nav class="pushpin-demo-nav" data-target="blue">
+
+    <div class="nav-wrapper" id="header">
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        <!--<div class="brand-logo center col s12 inline" >-->
+        <!--Parallel Coordinates-->
+        <!--</div>-->
+        <ul id="nav-mobile" class="left hide-on-med-and-down">
+            <li ><a href="http://www.depts.ttu.edu/hpcc/" class="logoLink"><img src="src/images/TTUlogo.png" alt="TTU"></a></li>
+            <li class="summaryText1" style="font-family: 'ITC Charter W01',Georgia,Garamond,serif;">  </li>
+            <li class ="currentDate center-align"></li>
+            <!--</div>-->
+        </ul>
+        <ul class="right">
+            <!--<li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>-->
+            <li class="tab active"><a class="active" href="#">Job Squeue</a></li>
+            <li ><a class="active" href="../index.html">OTHER LINKS</a></li>
+<!--            <li class="nav__menu hide">OTHER LINKS-->
+<!--                <ul class="nav__menu-lists nav__menu&#45;&#45;2-lists">-->
+<!--                    <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a></li>-->
+<!--                    <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/PhaseSpace/index.html">Phase Space</a></li>-->
+<!--                    <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>-->
+<!--                    <li class="nav__menu-items"><a href="https://idatavisualizationlab.github.io/HPCC/clusterDemo/index.html">ClusterView</a></li>-->
+<!--                </ul>-->
+<!--            </li>-->
+            <li><a href="#!" value="dark" id = "DarkTheme" class="btn waves-effect waves-effect waves-yellow">
+                <i class="material-icons left">brightness_6</i><span>Light</span></a></li>
+        </ul>
+    </div>
+</nav>
+<ul class="sidenav hide" id="mobile-demo">
+    <h5></h5>
+    <li><a href="http://www.depts.ttu.edu/hpcc/"><img src="src/images/TTUlogo.png" alt="Texas Tech University" class="avatar"></a></li>
+    <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/demo.html">HiperView</a></li>
+    <li><a href="https://idatavisualizationlab.github.io/HPCC/HiperView/HPCC_VR/index.html">Virtual Reality</a></li>
+    <li><a href="https://idatavisualizationlab.github.io/HPCC/ParallelCoordinates/index.html">Parallel Coordinates</a></li>
+</ul>
+<div id='datainformation'>
+    <table>
+        <tbody>
+        <tr><td>Filename:</td><td class="filename"></td></tr>
+        <tr><td>Size:</td><td class="size"></td></tr>
+        <tr><td>Time range:</td><td class="timerange"></td></tr>
+        <tr><td>Time interval:</td><td class="interval"></td></tr>
+        <tr><td>Total time step:</td><td class="totalstep"></td></tr>
+        <tr><td>#Hosts:</td><td class="hostsnum"></td></tr>
+        <tr><td>#Data points:</td><td class="datanum"></td></tr>
+        </tbody>
+    </table>
+</div>
+    <div id="mySidenav" class="sidenavs">
+        <ul id="listvar" class="dropdown-content  s12">
+
+        </ul>
+        <div class="row s12">
+        <ul id="leftpanel" class="collapsible">
+            <li class="searchPanel">
+                <div class="collapsible-header search-wrapper focused">
+                    <input type="text" id="search" placeholder="Search host e.g compute-1-1">
+                    <i class="material-icons" style="margin: auto;">search</i>
+                </div>
+                <div class="collapsible-body">
+                    <ul id="compute-list">
+                    </ul>
+                </div>
+            </li>
+            <li class="active">
+                <div class="collapsible-header"><i class="material-icons">settings</i>  Setting</div>
+                <div class="collapsible-body">
+                    <div class="current-dataset row valign-wrapper" >
+                        <div class="col s4 right-align">
+                            <span style="display:inline-block; margin:0;">Data</span>
+                            <i class="fa fa-database"></i>
+                        </div>
+                        <div class="col s7 no-padding" title="{{Dataset.currentDataset.name}}" >
+                            <span class="dataset-name col s7 truncate no-padding">{{Dataset.currentDataset.name}}</span>
+                            <dataset-selector></dataset-selector>
+                        </div>
+                        <div class="col s1">
+                            <button class="information" data-target='datainformation' data-title='Dataset information' >i</button>
+                        </div>
+                    </div>
+                    <!--<label for="datacom" class="col s4"> Dataset: </label>-->
+                    <!--<div  class="row s12">-->
+                        <!--<select id="datacom" class="col s7">-->
+                            <!--<option value="serviceWed26Sep" selected="selected">26 Sep 2018</option>-->
+                            <!--<option value="serviceWed27Sep">27 Sep 2018</option>-->
+                            <!--<option value="serviceWed04Oct" >04 Oct 2018</option>-->
+                            <!--<option value="service15Oct">15 Oct 2018</option>-->
+                            <!--<option value="service17Oct">17 Oct 2018</option>-->
+                            <!--&lt;!&ndash;<option value="influxdbThus21Mar_1520">21 Mar 2019</option>&ndash;&gt;-->
+                            <!--<option value="influxdbThus21Mar_1400_1630">21 Mar 2019</option>-->
+                            <!--<option type="csv" value="zenith_idrac_3.1_through_3.5">zenith_idrac_3.1_through_3.5</option>-->
+                            <!--&lt;!&ndash;<option value="influxdb">Real-time Influxdb</option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<option value="nagios">Real-time Nagios</option>&ndash;&gt;-->
+                        <!--</select>-->
+                    <!--</div>-->
+
+                        <table class="table table-striped table-hover row s12" id = "axisSetting">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th><input type="checkbox" checked="checked"></th>
+                                <th>Color by</th>
+                                <th>Metric</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    <button type="submit" class ="menuBtn btn-small" id="enableVariableCorrelation"> Variable Correlation </button>
+
+                    <!--<div id="colorContinuos"></div>-->
+                    <!--<p id="legend" class="col s12">-->
+                    <!--</p>-->
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header"><i class="material-icons">group_work</i> <span> Operational states </span></div>
+                <div class="collapsible-body">
+                    <div style="position: relative;">
+                        <div id="clusterLoading" class="loading hidden">
+                            <div class="progressDiv hidden">
+                                <h6 class="progressText spinnerC center" style="top: calc(50% - 15px);" >saving data...</h6>
+                                <div class="progress spinnerC center" style="width: 70%;">
+                                    <div class="determinate" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div  class="row valign-wrapper">
+                                <label for="clusterMethod" class="col s4 radarcontroller_layout"> Grouping Method</label>
+                                <select id="clusterMethod" class="col s8 radarcontroller_layout">
+                                    <option value="leaderbin" selected="selected">Leader Bin</option>
+                                    <option value="kmean">K-means</option>
+                                    <!--<option value="binarybin">Binary bin</option>-->
+                                </select>
+                            </div>
+                            <div  class="row valign-wrapper">
+                                <label for="normMethod" class="col s4 radarcontroller_layout"> Distance Function</label>
+                                <select id="normMethod" class="col s8 radarcontroller_layout">
+                                    <option value="l1">L1 norm - Manhattan Distance</option>
+                                    <option value="l2" selected="selected">L2 norm - Euclidean Distance</option>
+                                </select>
+                            </div>
+                            <form action="#" class='clusterProfile row valign-wrapper' id = "leaderbinprofile" onsubmit="recalculateCluster( {clusterMethod: 'leaderbin',normMethod:$('#normMethod').val(),bin:{startBinGridSize: +$('#startBinGridSize').val(),range: [+$('#lowrange').val(),+$('#highrange').val()]}},onchangeCluster);return false;">
+                                <label for="startBinGridSize" class="col s4 radarcontroller_layout hide">Initial diameter</label>
+                                <div  class="col s5 hide">
+                                    <input type="number" id="startBinGridSize" class="radarcontroller_layout browser-default">
+                                </div>
+                                <label for="lowrange" class="col s4 radarcontroller_layout">#Groups from </label>
+                                <div  class="col s5 no-pad-left valign-wrapper" >
+                                    <input type="number" id="lowrange" class="col s3 radarcontroller_layout browser-default no_leftmagrin">
+                                    <span class="col s2 no_leftmagrin">to</span>
+                                    <input type="number" id="highrange" class="col s3 radarcontroller_layout browser-default no_leftmagrin" >
+                                </div>
+                                <div  class="col s3 no_padding valign-wrapper center-align" >
+                                    <button type="submit" class="btn-small animatIcon"><i class="material-icons">send</i><div>Submit</div></button>
+                                </div>
+                            </form>
+                            <form action="#" class='clusterProfile hide row valign-wrapper' id = "kmeanprofile" onsubmit="recalculateCluster( {clusterMethod: 'kmean',normMethod:$('#normMethod').val(),bin:{k: +$('#knum').val(),iterations: +$('#kiteration').val()}},onchangeCluster);return false;">
+                                <label for="knum" class="col s4 radarcontroller_layout">#Groups</label>
+                                <div  class="col s5 no-pad-left valign-wrapper">
+                                    <input type="number" id="knum" class="col s3 radarcontroller_layout browser-default no_leftmagrin">
+                                    <span class="col s6 no_leftmagrin"> #Iterations</span>
+                                    <input type="number" id="kiteration" class="col s3 radarcontroller_layout browser-default no_leftmagrin" >
+                                </div>
+                                <div  class="col s3 no_padding valign-wrapper center-align" >
+                                    <button type="submit" class="btn-small animatIcon"><i class="material-icons">send</i><div>Submit</div></button>
+                                </div>
+                            </form>
+                            <form action="#" class='clusterProfile hide row valign-wrapper' id = "binarybinprofile" onsubmit="recalculateCluster( {clusterMethod: 'binarybin',normMethod:$('#normMethod').val()},onchangeCluster);return false;">
+                                <div  class="col s3 no_padding valign-wrapper center-align" >
+                                    <button type="submit" class="btn-small animatIcon"><i class="material-icons">send</i><div>Submit</div></button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="row s12 valign-wrapper" style="margin-bottom: 0; padding-top: 10px; background-color: white">
+                            <!--                                <label class="col s8 offset-s4 left-align">-->
+                            <!--                                    <input id="majorGroupDisplay_control" checked type="checkbox" class="filled-in">-->
+                            <!--                                    <span >Display min-max</span>-->
+                            <!--                                </label>-->
+                            <div class="col s8 offset-s3 left-align">
+                                <label for="majorGroupDisplay_control">Display: </label>
+                                <select id="majorGroupDisplay_control">
+                                    <option value="0">Leaders</option>
+                                    <option value="1" selected>Min-Max</option>
+                                    <option value="2">Histogram</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row s12 flex_contain flex_warp white" id="clusterDisplay">
+                            <button class="information waves-effect waves-light hide" style="right: 17px;position: absolute;"><i class="material-icons">priority_high</i></button>
+                            <div id='clusterinformation' class="informationDetail card">
+                                <table>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header"><i class="material-icons">help</i>Controls</div>
+                <div class="collapsible-body">
+                    <p>
+                        <strong>Brush</strong>: Drag vertically along an axis.<br/>
+                        <strong>Remove Brush</strong>: Tap the axis background.<br/>
+                        <strong>Reorder Axes</strong>: Drag a axis label horizontally.<br/>
+                        <strong>Invert Axis</strong>: Tap an axis label.<br/>
+                        <strong>Remove Axis</strong>: Drag axis label to the left edge.<br/>
+                    </p>
+                </div>
+            </li>
+        </ul>
+
+
+        <!--<div class="col s12">-->
+            <!--<h5>Controls</h5>-->
+            <!--<p>-->
+                <!--<strong>Brush</strong>: Drag vertically along an axis.<br/>-->
+                <!--<strong>Remove Brush</strong>: Tap the axis background.<br/>-->
+                <!--<strong>Reorder Axes</strong>: Drag a axis label horizontally.<br/>-->
+                <!--<strong>Invert Axis</strong>: Tap an axis label.<br/>-->
+                <!--<strong>Remove Axis</strong>: Drag axis label to the left edge.<br/>-->
+            <!--</p>-->
+        <!--</div>-->
+        </div>
+
+    </div>
+<div id="Maincontent" class="row s12">
+    <a href="javascript:void(0)" class="closebtn btn-floating btn waves-effect waves-light" onclick="closeNav()"><i class="material-icons">chevron_left</i></a>
+    <div class="overlaySide">
+        <a class="openbtn btn-floating btn waves-effect waves-light" id="sideNavbtn" onclick="openNav()">
+            <i class="material-icons">chevron_right</i></a>
+    </div>
+    <div id="header2" class="row s12 marginBottom0">
+        <!--<h1>HPCC Explorer</h1>-->
+        <button title="Zoom in on selected data" id="keep-data" class="hide" disabled="disabled">Keep</button>
+        <button title="Remove selected data" id="exclude-data" class="hide" disabled="disabled">Exclude</button>
+        <button title="Export data as CSV" id="export-data" class="hide">Export</button>
+        <div class="controls">
+            <strong id="rendered-count"></strong>/<strong id="selected-count"></strong><!--<strong id="data-count"></strong>-->
+            <div class="fillbar"><div id="selected-bar"><div id="rendered-bar">&nbsp;</div></div></div>
+            Lines at <strong id="opacity"></strong> opacity.
+
+            <div style="display: inline-block;">
+                <label for="overlayPlot" style="display: inline-block;"> Show: </label>
+                <select id="overlayPlot" style="display: inline-block;height: 21px;padding: 0;width: auto;">
+                    <option value="none" selected="selected">None</option>
+                    <option value="tick" selected="selected">ticks</option>
+                    <option value="violin">Violin plots</option>
+                    <option value="violin+tick">Violin plots + ticks</option>
+                </select>
+            </div>
+        </div>
+        <div style="clear:both;"></div>
+    </div>
+    <div class="row s12" style="margin-left: 40px;overflow-x: auto;">
+        <div id="network" class="row col s5" style="padding:0">
+<!--            <canvas id="networkconnect_background"></canvas>-->
+            <canvas id="networkconnect_foreground"></canvas>
+            <canvas id="networkconnect_highlight"></canvas>
+            <svg id="svgNetwork"></svg>
+        </div>
+        <div id="chart" class="row col s7" style="overflow:visible">
+            <canvas id="background"></canvas>
+            <canvas id="foreground"></canvas>
+            <canvas id="highlight"></canvas>
+            <svg style="overflow: visible"></svg>
+        </div>
+    </div>
+    <div style="margin:20px; position: relative; overflow-x: auto">
+        <table id="filterTable" class="order-column hover dark order-column filterLimit" style="width:100%"></table>
+    </div>
+    <div class="tap-target" data-target="sideNavbtn">
+        <div class="tap-target-content">
+            <h5>Title</h5>
+            <p>A bunch of text</p>
+        </div>
+    </div>
+    <database-table></database-table>
+    <footer class="page-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 s12">
+
+                </div>
+                <div class="col l4 offset-l2 s12">
+                    <h5>Credits &amp; License</h5>
+                    <p>
+                        Adapted from examples by
+                        <a href="http://bl.ocks.org/1341021">Mike Bostock</a>, <a href="http://bl.ocks.org/1341281">Jason Davies</a>
+                        and <a href="http://bl.ocks.org/syntagmatic/3150059">Kai Chang</a><br/>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright" style="color: unset">
+            <div class="container">
+<!--                &copy; 2012, Kai Chang All rights reserved. Released under the <a href="http://opensource.org/licenses/bsd-3-clause">BSD License</a>.-->
+                &copy; 2021, idatavisualizationlab All rights reserved. Released under the <a href="https://github.com/iDataVisualizationLab/HPCC/blob/master/LICENSE">MIT License</a>.
+            </div>
+        </div>
+    </footer>
+</div>
+
+</body>
+<script src="src/lib/jBox.all.min.js"></script>
+<link href="src/style/jBox.all.min.css" rel="stylesheet">
+<!--d3-->
+<script src="src/lib/d3.v5.min.js"></script>
+<script src="src/lib/d3-selection-multi.v1.min.js"></script>
+<script src="src/lib/d3-color.v1.min.js"></script>
+<script src="src/lib/d3-interpolate.v1.min.js"></script>
+<script src="src/lib/d3-scale-chromatic.v1.min.js"></script>
+<script src="src/lib/d3-sankey.js"></script>
+<!--data load-->
+<!--<script src="src/script/graphic/radarChart.js"></script>-->
+<!--<script src="src/script/graphic/roseChart.js"></script>-->
+<script src="src/script/violinChart.js"></script>
+<script src="src/lib/simple-statistics.min.js"></script>
+<!--table filter download-->
+<script src="src/lib/jquery.dataTables.min.js"></script>
+<script src="src/lib/dataTables.buttons.min.js"></script>
+<script src="src/lib/jszip.min.js"></script>
+<script src="src/lib/pdfmake.min.js"></script>
+<script src="src/lib/vfs_fonts.js"></script>
+<script src="src/lib/buttons.html5.min.js"></script>
+<script src="src/lib/moment.js"></script>
+<script src="src/lib/moment-duration-format.js"></script>
+<script src="src/lib/d3.tip.js"></script>
+
+<script src="src/script/setting_theme.js"></script>
+<script src="src/script/setting.js"></script>
+<!--<script src="src/data/serviceWed26Sep.js"></script>-->
+<!--<script src="http://mbostock.github.com/d3/d3.v2.js"></script>-->
+<script src="../HiperView/myscripts/util.js"></script>
+<script src="src/script/ulti.js"></script>
+<script src="src/script/readData.js"></script>
+<script src="src/script/correlation.js"></script>
+<script src="src/script/network.js"></script>
+<script lang="javascript" src="src/lib/xlsx.full.min.js"></script>
+<!--angular load-->
+<!--css-->
+<link rel="stylesheet" href="src/script/angular/components/databasetable/changeloadeddataset.css">
+<link rel="stylesheet" href="src/script/angular/components/databasetable/pastedataset.css">
+<link rel="stylesheet" href="src/script/angular/components/modal/modal.css">
+<link rel="stylesheet" href="src/script/angular/components/tabs/tab.css">
+<link rel="stylesheet" href="src/style/graph.css">
+<!--script-->
+<script src="src/script/angular/components/tabs/tab.js"></script>
+<script src="src/script/angular/components/tabs/tabset.js"></script>
+<script src="src/script/angular/components/modal/modalclosebutton.js"></script>
+<script src="src/script/angular/components/modal/modals.service.js"></script>
+<script src="src/script/angular/components/modal/modal.js"></script>
+<script src="src/script/angular/components/databasetable/databaseTable.service.js"></script>
+<script src="src/script/angular/components/databasetable/databaseTable.js"></script>
+<script src="src/script/angular/components/databasetable/config.service.js"></script>
+<script src="src/script/angular/components/databasetable/dataset.service.js"></script>
+<script src="src/script/angular/components/databasetable/changeloadeddataset.js"></script>
+<script src="src/script/angular/components/databasetable/datasetselector.js"></script>
+<script src="src/script/angular/components/databasetable/filedropzone.js"></script>
+<script src="src/script/angular/components/databasetable/pastedataset.js"></script>
+<script src="src/script/angular/components/databasetable/sampledata.js"></script>
+<script src="src/script/angular/components/loadData/loaddata.service.js"></script>
+
+<script src="src/script/angular/hpccApp.controller.js"></script>
+
+<script src="build/js/main.min.js"></script>
+<script src="src/lib/lodash.min.js"></script>
+<script src="src/script/main.js"></script>
+</html>
