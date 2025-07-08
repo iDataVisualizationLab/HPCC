@@ -129,6 +129,7 @@ if (mode === 'realTime') {
       });
 
       startRealTimePolling(); // trigger reload on range change
+      
     })
     .dispatch('change'); // trigger once on load
 
@@ -372,6 +373,8 @@ function startRealTimePolling() {
     request = new Simulation(fetchDataAndProcess(realTimeParams));
   }
   fetchAndUpdate();
+  initdraw();
+    initTimeElement();
   realTimeIntervalId = setInterval(fetchAndUpdate, intervalMs);
 }
 function loadHistoricalData() {
@@ -387,6 +390,8 @@ function loadHistoricalData() {
 
   const historicalParams = buildHistoricalParams(start, end);
   request = new Simulation(fetchDataAndProcess(historicalParams));
+  initdraw();
+    initTimeElement();
 }
 d3.selectAll('#navMode li a').on('click', function () {
   const mode = d3.select(this.parentNode).classed('realtime') ? 'realTime' : 'historical';
@@ -437,7 +442,7 @@ $(document).ready(function () {
                 enable: true,
                 idroot: index,
                 angle: 0,
-                range: [0, 1000]
+                range: [0, 3000]
             }]
         }));
         serviceFullList = [];
@@ -459,8 +464,8 @@ $(document).ready(function () {
     updateProcess({percentage: 5, text: 'Load UI...'})
     initMenu();
     updateProcess({percentage: 15, text: 'Preprocess data...'});
-    initdraw();
-    initTimeElement();
+    // initdraw();
+    // initTimeElement();
 });
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -880,6 +885,20 @@ $(document).ready(function () {
 //     initTimeElement();
 //     // queryLayout().then(()=>request.request());
 // });
+function getMetricMax(nodes_info, metric) {
+  let max = 0;
+  Object.values(nodes_info).forEach(node => {
+    const series = node[metric] || [];
+    series.forEach(values => {
+      (values || []).forEach(v => {
+        if (typeof v === 'number' && !isNaN(v)) {
+          max = Math.max(max, v);
+        }
+      });
+    });
+  });
+  return max;
+}
 
 function initTimeElement() {
 
@@ -887,6 +906,23 @@ function initTimeElement() {
     request.onDataChange.push((data) => {
         updateProcess({percentage: 50, text: 'Preprocess data'})
         setTimeout(() => {
+
+    //         serviceLists = serviceListattr.map((key, index) => {
+    //     const max = getMetricMax(data.nodes_info, key);
+    //     return {
+    //       text: key,
+    //       id: index,
+    //       enable: true,
+    //       sub: [{
+    //         text: key,
+    //         id: 0,
+    //         enable: true,
+    //         idroot: index,
+    //         angle: 0,
+    //         range: [0, Math.ceil(max * 1.1)] // add 10% headroom
+    //       }]
+    //     };
+    //   });
             handleRankingData(data);
             updateProcess({percentage: 80, text: 'Preprocess data'})
             drawJobList();
