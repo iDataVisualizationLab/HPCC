@@ -1,0 +1,33 @@
+<div class="load-url">
+    <form ng-submit="addDataset()">
+        <div class="form-group">
+            <label for="url-start">Start</label>
+            <input type="start"
+                   ng-model="url.start"
+                   id="url-start"
+                   required>
+            <label for="url-start">End</label>
+            <input type="end"
+                   ng-model="url.end"
+                   id="url-end"
+                   required>
+            <label for="url-interval">Interval</label>
+            <input type="end"
+                   ng-model="url.interval"
+                   id="url-interval"
+                   required>
+            <label for="url-start">Value</label>
+            <select type="value"
+                   ng-model="url.value"
+                   id="url-value"
+                    class="browser-default col s4"
+                   required>
+                <option value="min" selected>min</option>
+                <option value="max" selected>max</option>
+                <option value="mean">mean</option>
+                <option value="median">median</option>
+            </select>
+        </div>
+        <button type="submit">Add data</button>
+    </form>
+</div>
