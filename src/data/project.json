@@ -394,6 +394,7 @@
     "title": "PowerMap",
     "thumb": "PowerMap.PNG",
     "url": "https://idatavisualizationlab.github.io/HPCC/PowerMap/index.html",
+    "url_stable": ["https://idatavisualizationlab.github.io/HPCC/PowerMap/stable/PowerMap_v1.0.0/index.html"],
     "tags": [
       "slurm","time series"
     ],
