@@ -30,23 +30,14 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Prepare deployment directory (exclude versions/)
+      - name: Remove all versions/ folders before upload
         run: |
-          mkdir -p /tmp/deploy
-          rsync -av \
-            --exclude '**/versions' \
-            --exclude '**/versions/**' \
-            --exclude '.git' \
-            --exclude '.github' \
-            --exclude '.gitignore' \
-            --exclude 'README.md' \
-            --exclude 'deploy.json' \
-            ./ /tmp/deploy/
+          find . -type d -name "versions" -exec rm -rf {} +
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: /tmp/deploy
+          path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment
