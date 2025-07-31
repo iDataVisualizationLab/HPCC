@@ -33,12 +33,14 @@ jobs:
       - name: Prepare deployment directory (exclude versions/)
         run: |
           mkdir deploy
-          rsync -av . ./deploy \
-            --exclude '**/versions' \
-            --exclude '**/versions/**' \
-            --exclude '.git' \
-            --exclude '.github' \
-            --exclude '.gitignore'
+          rsync -av \
+            --exclude=versions \
+            --exclude=.github \
+            --exclude=.git \
+            --exclude=.gitignore \
+            --exclude=README.md \
+            --exclude=deploy.json \
+            ./ ./deploy/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
