@@ -32,20 +32,21 @@ jobs:
 
       - name: Prepare deployment directory (exclude versions/)
         run: |
-          mkdir deploy
+          mkdir -p /tmp/deploy
           rsync -av \
-            --exclude=versions \
-            --exclude=.github \
-            --exclude=.git \
-            --exclude=.gitignore \
-            --exclude=README.md \
-            --exclude=deploy.json \
-            ./ ./deploy/
+            --exclude '**/versions' \
+            --exclude '**/versions/**' \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude '.gitignore' \
+            --exclude 'README.md' \
+            --exclude 'deploy.json' \
+            ./ /tmp/deploy/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './deploy'
+          path: /tmp/deploy
 
       - name: Deploy to GitHub Pages
         id: deployment
