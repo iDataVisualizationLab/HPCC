@@ -376,7 +376,7 @@
     "title": "JobPower",
     "thumb": "TimeArc.png",
     "url": "https://idatavisualizationlab.github.io/HPCC/JobPower/index.html",
-    "url_stable": ["https://idatavisualizationlab.github.io/HPCC/JobPower_v1/index.html"],
+    "url_stable": ["https://idatavisualizationlab.github.io/HPCC/JobPower/stable/JobPower_v1/index.html","https://idatavisualizationlab.github.io/HPCC/JobPower/stable/JobPower_v2.0.0/index.html"],
     "tags": [
       "TimeArcs","slurm"
     ],
