@@ -1,0 +1,37 @@
+span.clusternum {
+    font-weight: bold;
+    text-align: center;
+}
+
+.first span.clusternum::after {
+    content: ' nodes';
+}
+.first span.clusterMSE::before {
+    content: 'Deviation area: ';
+}
+/*#clusterDisplay > span.clusternum ~ span.clusternum ::after {*/
+/*content: ' s';*/
+/*}*/
+
+input.clusterlabel {
+    border: #7b7b7b solid 0.5px;
+    font-size: 12px;
+    height: 1.5rem;
+    margin-bottom: 1px;
+    border-radius: 10px;
+    background-color: white;
+    padding: 0 5px;
+    outline: none;
+}
+
+/*span.clusterlabel::before {*/
+/*    content: 'Group 'attr(data-order)': ';*/
+/*}*/
+
+input.clusterlabel:hover, input.clusterlabel:focus{
+    box-shadow: 0 10px 10px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+    -webkit-box-shadow: 0 10px 10px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+}
+span.clusterlabel{
+    text-align: center ;
+}
