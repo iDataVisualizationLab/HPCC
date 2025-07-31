@@ -1,0 +1,120 @@
+svg {
+    font-size: 12px;
+    fill: currentcolor;
+}
+
+
+.inner_node {
+    pointer-events: all;
+}
+.inner_node text{
+    fill: black;
+}
+
+.inner_node rect {
+    pointer-events: all;
+    stroke: #000000;
+    stroke-width: 0.3;
+    fill: #f0f0f0;
+}
+
+.inner_node.highlight rect {
+    opacity: 1;
+    /*stroke-width: 2px;*/
+    /*fill: #f1faee;*/
+}
+.inner_node.highlight text{
+    fill: black;
+}
+.onhighlight .item, .onhighlight .outer_node{
+    opacity: 0.1;
+    pointer-events:none
+}
+.onhighlight .outer_node .label{
+    opacity: 0;
+}
+.onhighlight .outer_node .highlight .label{
+    opacity: 1;
+}
+.onhighlight .highlight, .onhighlight .highlight .item{
+    opacity: 1;
+    pointer-events:all
+}
+.onhighlight .extra_nodes .line.highlight,.onhighlight .extra_nodes2 .line.highlight{
+    stroke:black;
+    display: unset;
+}
+.onhighlight .extra_nodes .line, .onhighlight .extra_nodes2 .line{
+    display:none;
+}
+g.links .link {
+    opacity: 0.95;
+    stroke-width:0.3;
+}
+
+text {
+    /*font: 10px sans-serif;*/
+    /*text-anchor: middle;*/
+    pointer-events: none;
+
+}
+
+.outer_node.highlightSummary .summary{
+    display: block;
+}
+.outer_node.highlightSummary text{
+    /*stroke:#e63946;*/
+    font-weight: bold;
+}
+
+.outer_node .circle.invalid{
+    fill: black;
+}
+.link {
+    fill: none;
+    /*stroke: #a8dadc;*/
+}
+
+.hide {
+    display: none;
+}
+
+#informationTable .detailComp {
+    width: 500px;
+}
+#informationTable  .collapHeader{
+    min-width: 12px!important;
+}
+#informationTable  .details-control span{
+    height: 2rem;
+    overflow-y: hidden;
+}
+#informationTable .morebtn{
+    font-size: 0.8rem;
+    background-color: #c0c0c0;
+    color: black;
+    padding: 1px;
+}
+
+#informationTable .morebtn[value='close']{
+    display: none;
+}
+#informationTable tr.shown .morebtn[value='close']{
+    display: block;
+}
+#informationTable tr.shown .morebtn[value='open']{
+    display: none;
+}
+
+.d3-tip span {
+    text-shadow: 1px 1px rgba(255, 255, 255, 0.6);
+}
+#circularLayoutHolder select{
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.legendView input{
+    padding-right: 2px;
+    padding-left: 2px;
+}

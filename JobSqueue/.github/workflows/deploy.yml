@@ -1,0 +1,136 @@
+name: Deploy Static Site
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  delete:
+
+jobs:
+  deploy:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read deploy version from deploy.json
+        id: version
+        run: |
+          DEPLOY_VERSION=$(jq -r '.deploy' deploy.json)
+          echo "Deploying version: $DEPLOY_VERSION"
+          echo "version=$DEPLOY_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Copy selected version to deploy/
+        run: |
+          REPO="${GITHUB_REPOSITORY##*/}"
+          mkdir -p deploy
+          DEPLOY_VERSION="${{ steps.version.outputs.version }}"
+
+          if [ "$DEPLOY_VERSION" = "latest" ]; then
+            echo "Deploying root (latest) version"
+            rsync -av \
+              --exclude=versions \
+              --exclude=.github \
+              --exclude=.git \
+              --exclude=.gitignore \
+              --exclude=README.md \
+              --exclude=deploy.json \
+              ./ ./deploy/
+          else
+            VERSION_FOLDER="versions/${REPO}_${DEPLOY_VERSION}"
+            if [ -d "$VERSION_FOLDER" ]; then
+              echo "Deploying from $VERSION_FOLDER"
+              rsync -av "$VERSION_FOLDER/" ./deploy/
+            else
+              echo "⚠️ Version folder $VERSION_FOLDER does not exist, falling back to latest"
+              rsync -av \
+                --exclude=versions \
+                --exclude=.github \
+                --exclude=.git \
+                --exclude=.gitignore \
+                --exclude=README.md \
+                --exclude=deploy.json \
+                ./ ./deploy/
+            fi
+          fi
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./deploy
+
+  add_tag:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Copy to versions/ on tag push
+        run: |
+          REPO="${GITHUB_REPOSITORY##*/}"
+          TAG_NAME="${GITHUB_REF##refs/tags/}"
+          mkdir -p "versions/${REPO}_${TAG_NAME}"
+          rsync -av \
+            --exclude=versions \
+            --exclude=.github \
+            --exclude=.git \
+            --exclude=.gitignore \
+            --exclude=README.md \
+            --exclude=deploy.json \
+            ./ "versions/${REPO}_${TAG_NAME}/"
+
+
+      - name: Commit version folder
+        run: |
+          REPO="${GITHUB_REPOSITORY##*/}"
+          TAG_NAME="${GITHUB_REF##refs/tags/}"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add "versions/${REPO}_${TAG_NAME}"
+
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "Add ${REPO} version ${TAG_NAME}"
+            git push origin HEAD:main
+          fi
+
+  cleanup:
+    if: github.event_name == 'delete' && github.event.ref_type == 'tag' && startsWith(github.event.ref, 'v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete event info
+        run: |
+          echo "Event: $GITHUB_EVENT_NAME"
+          echo "Ref: $GITHUB_REF"
+          echo "Event ref: ${{ github.event.ref }}"
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Delete version folder
+        run: |
+          REPO="${GITHUB_REPOSITORY##*/}"
+          TAG_NAME="${{ github.event.ref }}"
+          FOLDER="versions/${REPO}_${TAG_NAME}"
+          if [ -d "$FOLDER" ]; then
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git rm -r "$FOLDER"
+            if git diff --cached --quiet; then
+              echo "Nothing to commit"
+            else
+              git commit -m "Delete version folder for deleted tag ${TAG_NAME}"
+              git push origin main
+            fi
+          else
+            echo "Folder $FOLDER does not exist. Skipping."
+          fi
