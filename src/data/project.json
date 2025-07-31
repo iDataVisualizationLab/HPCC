@@ -359,6 +359,7 @@
     "title": "Job Squeue",
     "thumb": "JobSqueue.PNG",
     "url": "https://idatavisualizationlab.github.io/HPCC/JobSqueue/index.html",
+    "url_stable": ["https://idatavisualizationlab.github.io/HPCC/JobSqueue/stable/JobSqueue_v1.0.0/index.html"],
     "tags": [
       "squeue","slurm"
     ],
