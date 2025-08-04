@@ -158,6 +158,7 @@ d3.TimeArc = function () {
     timeArc.init = function () {
 //---End Insert------
 //Append a SVG to the body of the html page. Assign this SVG as an object to svg
+
         svg.classed('timearc', true)
             .attr('width', graphicopt.width)
             .attr('height', graphicopt.height);

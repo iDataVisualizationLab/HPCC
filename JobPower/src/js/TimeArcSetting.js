@@ -96,11 +96,13 @@ let TimeArcSetting = function (){
     };
 
     master.draw = function () {
-        if (isFirst) {
-            debugger
+        // if (isFirst) {
+        //     debugger
+        //     master.init();
+        //     isFirst = false;
+        // }
+        d3.select(graphicopt.contain).selectAll('*').remove();
             master.init();
-            isFirst = false;
-        }
 
         if (filterTerm.length<4000 || confirm(`It will take long time to process ${filterTerm.length} jobs. Continue?`)) {
             scheme.filterTerm = filterTerm;
