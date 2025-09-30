@@ -27,7 +27,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.13.0",
     "@ng-bootstrap/ng-bootstrap": "^6.1.0",
     "@types/d3": "^5.7.2",
-    "@types/lodash": "^4.14.153",
+    "@types/lodash": "^4.17.20",
     "angular-datatables": "^9.0.2",
     "animate.css": "^4.1.0",
     "bootstrap": "^4.4.0",
@@ -36,7 +36,7 @@
     "datatables.net": "^1.10.21",
     "datatables.net-dt": "^1.10.21",
     "jquery": "^3.5.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
