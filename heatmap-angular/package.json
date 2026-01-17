@@ -28,7 +28,7 @@
     "@ng-bootstrap/ng-bootstrap": "^6.1.0",
     "@types/d3": "^5.7.2",
     "@types/lodash": "^4.14.153",
-    "angular-datatables": "^9.0.2",
+    "angular-datatables": "^19.0.0",
     "animate.css": "^4.1.0",
     "bootstrap": "^4.4.0",
     "bootstrap-table": "^1.16.0",
@@ -42,8 +42,8 @@
     "zone.js": "~0.10.2"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.901.7",
-    "@angular/cli": "~9.1.7",
+    "@angular-devkit/build-angular": "~21.1.0",
+    "@angular/cli": "~21.1.0",
     "@angular/compiler-cli": "~9.1.9",
     "@types/datatables.net": "^1.10.19",
     "@types/jasmine": "~3.5.0",
